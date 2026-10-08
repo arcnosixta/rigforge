@@ -8,7 +8,7 @@
 <meta property="og:title" content="RigForge — собери ПК, который точно заработает">
 <meta property="og:description" content="Конфигуратор ПК с честной проверкой совместимости: сокеты, чипсеты, DDR4/DDR5, TDP, габариты, разъёмы питания.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cff'/><path d='M9 22V10h7a4 4 0 010 8h-3l4 4' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23101013'/><path d='M9 23V9h7.5a4.5 4.5 0 010 9H12l6 5' stroke='%23D8FF3D' stroke-width='2.6' fill='none' stroke-linecap='square'/></svg>">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,7 +23,7 @@
   <div class="container nav-inner">
     <a class="logo" href="#top">
       <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="26" height="26"><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M9 22V10h7a4 4 0 010 8h-3l4 4" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#7c5cff"/><stop offset="1" stop-color="#00e5a0"/></linearGradient></defs></svg>
+        <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><rect width="32" height="32" rx="4" fill="#101013"/><path d="M9 23V9h7.5a4.5 4.5 0 010 9H12l6 5" stroke="#D8FF3D" stroke-width="2.6" fill="none" stroke-linecap="square"/></svg>
       </span>
       RIGFORGE
     </a>
@@ -92,14 +92,19 @@
       </div>
     </div>
   </div>
-  <div class="hero-fade"></div>
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>Socket AM5<b>◆</b>LGA1700<b>◆</b>LGA1851<b>◆</b>DDR5-6000<b>◆</b>PCIe 5.0<b>◆</b>12V-2x6<b>◆</b>ATX 3.1<b>◆</b>30 правил совместимости<b>◆</b>91 модель<b>◆</b>12 ноутбуков<b>◆</b>Проверка до покупки<b>◆</b></span>
+      <span>Socket AM5<b>◆</b>LGA1700<b>◆</b>LGA1851<b>◆</b>DDR5-6000<b>◆</b>PCIe 5.0<b>◆</b>12V-2x6<b>◆</b>ATX 3.1<b>◆</b>30 правил совместимости<b>◆</b>91 модель<b>◆</b>12 ноутбуков<b>◆</b>Проверка до покупки<b>◆</b></span>
+    </div>
+  </div>
 </section>
 
 <!-- ================= BUILDER ================= -->
 <section class="section" id="build">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span> Конфигуратор</div>
+      <div class="sec-row"><div class="eyebrow"><span class="dot"></span> Конфигуратор</div><span class="sec-num">01 / BUILD</span></div>
       <h2>Сборка ПК <span class="accent">с проверкой</span></h2>
       <p>Выбирайте детали в любом порядке — мы сразу подсветим, что не подходит по сокету, памяти, габаритам или питанию.</p>
     </div>
@@ -182,7 +187,7 @@
 <section class="section section-alt" id="laptop">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span> Апгрейд</div>
+      <div class="sec-row"><div class="eyebrow"><span class="dot"></span> Апгрейд</div><span class="sec-num">02 / LAPTOP</span></div>
       <h2>Улучшение <span class="accent">ноутбука</span></h2>
       <p>Выберите свою модель — покажем, какие слоты реально свободны: память припаяна или нет, какой размер диска влезет, есть ли отсек под SATA.</p>
     </div>
@@ -237,7 +242,7 @@
 <section class="section" id="how">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span> Логика</div>
+      <div class="sec-row"><div class="eyebrow"><span class="dot"></span> Логика</div><span class="sec-num">03 / RULES</span></div>
       <h2>Что именно <span class="accent">мы проверяем</span></h2>
       <p>Те же проверки, которые делает опытный сборщик руками — только сразу и без пропущенных мелочей.</p>
     </div>
@@ -249,7 +254,7 @@
 <section class="section section-alt" id="parts">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span> Каталог</div>
+      <div class="sec-row"><div class="eyebrow"><span class="dot"></span> Каталог</div><span class="sec-num">04 / DATABASE</span></div>
       <h2>Вся <span class="accent">база</span> комплектующих</h2>
       <p>Процессоры AMD и Intel, платы на разных чипсетах, видеокарты, память, накопители, корпуса и питание — с ключевыми характеристиками.</p>
     </div>

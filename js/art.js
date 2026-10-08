@@ -21,7 +21,7 @@ function grad(c1, c2, id) {
 function partArt(cat, p) {
   const c = brandColor(p.brand);
   const g = uid();
-  const dark = '#12151d', mid = '#1c2130', line = '#2b3245';
+  const dark = '#101013', mid = '#FBFBF6', line = '#101013', tail = '#DFE1D8';
   switch (cat) {
     case 'cpu': return `
       <svg viewBox="0 0 160 100" class="pa">
@@ -39,7 +39,7 @@ function partArt(cat, p) {
 
     case 'mb': return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(mid, '#0d1017', g)}</defs>
+        <defs>${grad(mid, tail, g)}</defs>
         <rect x="14" y="6" width="132" height="88" rx="6" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <rect x="30" y="16" width="40" height="40" rx="4" fill="#0b0e14" stroke="${c}" stroke-width="2"/>
         <rect x="38" y="24" width="24" height="24" rx="3" fill="${c}" opacity=".55"/>
@@ -56,7 +56,7 @@ function partArt(cat, p) {
       const fx = fans === 3 ? [40, 80, 120] : [52, 100];
       return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(shade(c, -20), '#0d1017', g)}</defs>
+        <defs>${grad(shade(c, -20), tail, g)}</defs>
         <rect x="10" y="24" width="130" height="52" rx="7" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         ${fx.map(x => `<g><circle cx="${x}" cy="50" r="17" fill="#0b0e14" stroke="${c}" stroke-width="2" opacity=".9"/><circle cx="${x}" cy="50" r="5" fill="${c}"/><path d="M${x} 33v10M${x} 57v10M${x - 17} 50h10M${x + 7} 50h10" stroke="${c}" stroke-width="2" stroke-linecap="round" opacity=".65"/></g>`).join('')}
         <rect x="6" y="18" width="8" height="64" rx="2" fill="${mid}" stroke="${line}"/>
@@ -73,18 +73,18 @@ function partArt(cat, p) {
       const stick = (y) => `<g transform="translate(0,${y})"><rect x="16" y="${n > 1 ? 14 : 30}" width="128" height="34" rx="4" fill="url(#${g})" stroke="${line}" stroke-width="2"/><rect x="16" y="${n > 1 ? 14 : 30}" width="128" height="34" rx="4" fill="none" stroke="${c}" stroke-width="2" opacity=".6"/>${chips}<path d="M60 ${n > 1 ? 48 : 64}h6" stroke="${line}" stroke-width="3"/><path d="M62 ${n > 1 ? 48 : 64}v6" stroke="${c}" stroke-width="3"/></g>`;
       return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(mid, '#0d1017', g)}</defs>
+        <defs>${grad(mid, tail, g)}</defs>
         ${n >= 2 ? stick(-4) : ''}
         ${n >= 2 ? stick(24) : stick(0)}
         <rect x="16" y="86" width="128" height="7" rx="2" fill="${c}" opacity=".5"/>
-        <text x="80" y="97" text-anchor="middle" font-size="8" font-weight="700" fill="${c}" font-family="Inter,system-ui">${p.type} ${p.speed}</text>
+        <text x="80" y="97" text-anchor="middle" font-size="8" font-weight="700" fill="${shade(c,-55)}" font-family="Inter,system-ui">${p.type} ${p.speed}</text>
       </svg>`;
     }
 
     case 'ssd': {
       if (p.iface === 'sata' && p.size === '3.5') return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(mid, '#0d1017', g)}</defs>
+        <defs>${grad(mid, tail, g)}</defs>
         <rect x="22" y="18" width="116" height="64" rx="6" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <circle cx="80" cy="50" r="24" fill="#0b0e14" stroke="${c}" stroke-width="2"/>
         <circle cx="80" cy="50" r="7" fill="${c}" opacity=".8"/>
@@ -93,7 +93,7 @@ function partArt(cat, p) {
       </svg>`;
       if (p.iface === 'sata') return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(shade(c, -30), '#0d1017', g)}</defs>
+        <defs>${grad(shade(c, -30), tail, g)}</defs>
         <rect x="26" y="20" width="108" height="60" rx="7" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <rect x="38" y="32" width="60" height="36" rx="4" fill="#0b0e14" opacity=".7"/>
         <text x="68" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="${c}" font-family="Inter,system-ui">2.5"</text>
@@ -103,14 +103,14 @@ function partArt(cat, p) {
       const pcie5 = p.iface === 'm2-pcie5';
       return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(pcie5 ? c : mid, '#0d1017', g)}</defs>
+        <defs>${grad(pcie5 ? c : mid, tail, g)}</defs>
         <rect x="8" y="34" width="144" height="32" rx="5" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <g fill="#0b0e14" opacity=".85"><rect x="34" y="41" width="22" height="18" rx="2"/><rect x="62" y="41" width="22" height="18" rx="2"/><rect x="90" y="41" width="22" height="18" rx="2"/></g>
         <rect x="120" y="41" width="20" height="18" rx="2" fill="${c}" opacity=".55"/>
         <g fill="${c}"><rect x="8" y="42" width="4" height="16" rx="1.5"/><rect x="14" y="42" width="3" height="16" rx="1"/></g>
         <rect x="8" y="66" width="16" height="10" rx="2" fill="${c}" opacity=".7"/>
         <circle cx="28" cy="60" r="3" fill="${c}"/>
-        <text x="88" y="84" text-anchor="middle" font-size="9" font-weight="700" fill="${c}" font-family="Inter,system-ui">${pcie5 ? 'PCIe 5.0 NVMe' : 'M.2 NVMe'}</text>
+        <text x="88" y="84" text-anchor="middle" font-size="9" font-weight="700" fill="${shade(c,-55)}" font-family="Inter,system-ui">${pcie5 ? 'PCIe 5.0 NVMe' : 'M.2 NVMe'}</text>
       </svg>`;
     }
 
@@ -123,7 +123,7 @@ function partArt(cat, p) {
         <g stroke="${c}" stroke-width="2" opacity=".55" fill="none"><circle cx="58" cy="51" r="13"/><circle cx="58" cy="51" r="20"/></g>
         <rect x="94" y="32" width="26" height="16" rx="3" fill="${c}" opacity=".45"/>
         <rect x="94" y="54" width="26" height="16" rx="3" fill="${c}" opacity=".25"/>
-        <text x="72" y="94" text-anchor="middle" font-size="10" font-weight="800" fill="${c}" font-family="Inter,system-ui">${p.w} Вт</text>
+        <text x="72" y="94" text-anchor="middle" font-size="10" font-weight="800" fill="${shade(c,-55)}" font-family="Inter,system-ui">${p.w} Вт</text>
         <path d="M128 34c14 0 14 14 24 14M128 50c14 0 14 14 24 14M128 66c14 0 14 14 24 14" stroke="${line}" stroke-width="3" fill="none" stroke-linecap="round"/>
       </svg>`;
 
@@ -148,11 +148,11 @@ function partArt(cat, p) {
         <rect x="96" y="34" width="48" height="34" rx="8" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <circle cx="120" cy="51" r="12" fill="#0b0e14" stroke="${c}" stroke-width="2"/><circle cx="120" cy="51" r="4" fill="${c}"/>
         <path d="M90 44c-8 0-8 14-16 14" stroke="${line}" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <text x="52" y="96" text-anchor="middle" font-size="9" font-weight="700" fill="${c}" font-family="Inter,system-ui">радиатор ${p.radiator} мм</text>
+        <text x="52" y="96" text-anchor="middle" font-size="9" font-weight="700" fill="${shade(c,-55)}" font-family="Inter,system-ui">радиатор ${p.radiator} мм</text>
       </svg>`;
       return `
       <svg viewBox="0 0 160 100" class="pa">
-        <defs>${grad(shade(c, -15), '#0d1017', g)}</defs>
+        <defs>${grad(shade(c, -15), tail, g)}</defs>
         <rect x="52" y="8" width="56" height="72" rx="5" fill="url(#${g})" stroke="${line}" stroke-width="2"/>
         <g stroke="${shade(c, -30)}" stroke-width="3" stroke-linecap="round" opacity=".8">
           <path d="M58 16h44M58 26h44M58 36h44M58 46h44M58 56h44M58 66h44M58 74h44"/>
@@ -160,7 +160,7 @@ function partArt(cat, p) {
         <rect x="34" y="22" width="24" height="46" rx="6" fill="${mid}" stroke="${c}" stroke-width="2"/>
         <circle cx="46" cy="45" r="9" fill="#0b0e14" stroke="${c}" stroke-width="2"/><circle cx="46" cy="45" r="3" fill="${c}"/>
         <rect x="66" y="84" width="28" height="8" rx="3" fill="${c}" opacity=".7"/>
-        <text x="80" y="98" text-anchor="middle" font-size="9" font-weight="700" fill="${c}" font-family="Inter,system-ui">${p.tdp} Вт TDP</text>
+        <text x="80" y="98" text-anchor="middle" font-size="9" font-weight="700" fill="${shade(c,-55)}" font-family="Inter,system-ui">${p.tdp} Вт TDP</text>
       </svg>`;
     }
     case 'hdd': return partArt('ssd', { ...p, iface: 'sata', size: '3.5' });
