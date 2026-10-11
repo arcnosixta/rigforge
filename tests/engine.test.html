@@ -108,7 +108,7 @@
 
     test('публикует только фотографии с прямыми ссылками и атрибуцией лицензии', () => {
       const photos = Object.values(CATALOG).flat().filter(part => part.photoUrl);
-      assert(photos.length >= 2, 'ожидались проверенные фотографии процессоров');
+      assert(photos.length >= 4, 'ожидались проверенные фотографии четырёх моделей процессоров');
       photos.forEach(part => {
         assert(part.photoUrl.startsWith('https://'), `${part.name}: нужна HTTPS-ссылка на фотографию`);
         assert(part.photoSourceUrl.startsWith('https://'), `${part.name}: нужна ссылка на источник`);
