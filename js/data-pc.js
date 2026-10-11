@@ -44,7 +44,7 @@ const CATALOG = {
   ],
 
   cooler: [
-    { id: 'wraith-stealth', brand: 'AMD', name: 'Wraith Stealth (в комплекте)', type: 'air', sockets: ['AM5', 'AM4'], tdp: 65, height: 55, price: 0, note: 'Идёт в комплекте с Ryzen 5 7600/9600X и 8600G' },
+    { id: 'wraith-stealth', brand: 'AMD', name: 'Wraith Stealth (в комплекте)', type: 'air', sockets: ['AM5', 'AM4'], tdp: 65, height: 55, price: 0, note: 'Идёт в комплекте с Ryzen 5 7600 и 8600G' },
     { id: 'laminar-rm1', brand: 'Intel', name: 'Laminar RM1 (в комплекте)', type: 'air', sockets: ['LGA1700'], tdp: 65, height: 60, price: 0, note: 'Боксовый кулер Intel' },
     { id: 'ak400', brand: 'DeepCool', name: 'AK400 Digital', type: 'air', sockets: ['AM5', 'AM4', 'LGA1700', 'LGA1851'], tdp: 220, height: 155, price: 2490 },
     { id: 'pa120', brand: 'Thermalright', name: 'Peerless Assassin 120 SE', type: 'air', sockets: ['AM5', 'AM4', 'LGA1700', 'LGA1851'], tdp: 245, height: 155, price: 2790, note: 'Лучший башенный кулер по цене' },

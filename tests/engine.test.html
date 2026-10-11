@@ -44,6 +44,14 @@
       assert(hasError(result, 'максимум 320 мм'), 'ожидалась ошибка габаритов видеокарты');
     });
 
+    test('не считает Wraith Stealth комплектным кулером для Ryzen 5 9600X', () => {
+      const result = analyze({ cpu: 'r5-9600x', cooler: 'wraith-stealth' });
+      assert(result.issues.some(issue => issue.level === 'warn' && issue.msg.includes('поставляется только')),
+        'ожидалось предупреждение, что кулер не входит в комплект Ryzen 5 9600X');
+      assert(!result.issues.some(issue => issue.level === 'ok' && issue.msg.includes('Кулер в комплекте')),
+        'кулер не должен помечаться как комплектный');
+    });
+
     test('проверяет число SATA-разъёмов питания', () => {
       const original = BY.psu.pf450.sata;
       try {
