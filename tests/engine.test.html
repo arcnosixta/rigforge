@@ -106,6 +106,16 @@
       });
     });
 
+    test('публикует только фотографии с прямыми ссылками и атрибуцией лицензии', () => {
+      const photos = Object.values(CATALOG).flat().filter(part => part.photoUrl);
+      assert(photos.length >= 2, 'ожидались проверенные фотографии процессоров');
+      photos.forEach(part => {
+        assert(part.photoUrl.startsWith('https://'), `${part.name}: нужна HTTPS-ссылка на фотографию`);
+        assert(part.photoSourceUrl.startsWith('https://'), `${part.name}: нужна ссылка на источник`);
+        assert(part.photoLicense && part.photoLicenseUrl.startsWith('https://'), `${part.name}: нужна подпись и ссылка лицензии`);
+      });
+    });
+
     test('не предлагает модульную память для MacBook с распаянной памятью', () => {
       const result = analyzeLaptop('mba-m2', { ram: 'sd-ddr5-16' });
       assert(result.errors > 0, 'ожидалась ошибка апгрейда памяти');

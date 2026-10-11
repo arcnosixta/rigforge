@@ -61,11 +61,14 @@ function specs(cat, p) {
   return [];
 }
 
-function productPhoto(cat, p) {
+function productPhoto(p) {
   if (typeof p.photoUrl !== 'string' || !p.photoUrl.startsWith('https://')) return '';
-  const source = typeof p.photoSourceUrl === 'string' && p.photoSourceUrl.startsWith('https://')
-    ? `<a class="photo-credit" href="${p.photoSourceUrl}" target="_blank" rel="noopener noreferrer">Фото: ${p.photoSource || 'источник'}</a>`
-    : '';
+  if (typeof p.photoSourceUrl !== 'string' || !p.photoSourceUrl.startsWith('https://') ||
+      typeof p.photoLicenseUrl !== 'string' || !p.photoLicenseUrl.startsWith('https://')) return '';
+  const source = `<span class="photo-credit">
+    <a href="${p.photoSourceUrl}" target="_blank" rel="noopener noreferrer">${p.photoSource}</a>
+    · <a href="${p.photoLicenseUrl}" target="_blank" rel="noopener noreferrer">${p.photoLicense}</a>
+  </span>`;
   return `<img class="product-photo" src="${p.photoUrl}" alt="Фото: ${p.name}" loading="lazy" decoding="async">${source}`;
 }
 
@@ -115,7 +118,7 @@ function renderParts() {
         : `<div class="badge b-ok">${icon('check', 13)} Подходит к этой сборке</div>`;
     const specHtml = specs(cat, p).filter(Boolean).map(s => `<span>${s}</span>`).join('');
     return `<article class="part ${sel === p.id ? 'sel' : ''} ${errs.length ? 'bad' : ''}" data-id="${p.id}" style="--d:${i * 45}ms" tabindex="0" role="button" aria-pressed="${sel === p.id}">
-      <div class="part-art">${partArt(cat, p)}${productPhoto(cat, p)}</div>
+      <div class="part-art">${partArt(cat, p)}${productPhoto(p)}</div>
       <div class="part-body">
         <div class="part-brand">${p.brand}</div>
         <h4>${p.name}</h4>
@@ -346,7 +349,7 @@ function renderCatalog() {
   }
   $('#catalogGrid').innerHTML = items.map(([cat, p], i) => `
     <article class="cat-card" style="--d:${Math.min(i, 24) * 30}ms">
-      <div class="cc-art">${partArt(cat, p)}${productPhoto(cat, p)}</div>
+      <div class="cc-art">${partArt(cat, p)}${productPhoto(p)}</div>
       <div class="cc-brand">${p.brand}</div>
       <h5>${p.name}</h5>
       <div class="specs">${specs(cat, p).filter(Boolean).map(s => `<span>${s}</span>`).join('')}</div>
@@ -626,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* карточки деталей */
   $('#partsGrid').addEventListener('click', e => {
+    if (e.target.closest('.photo-credit')) return;
     const card = e.target.closest('.part');
     if (!card) return;
     selectPart(state.cat, card.dataset.id, card);
