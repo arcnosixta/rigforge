@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RigForge — тесты движка</title>
+</head>
+<body>
+  <h1>Тесты совместимости</h1>
+  <pre id="results" aria-live="polite">Выполняются…</pre>
+  <script src="../js/data-pc.js"></script>
+  <script src="../js/data-laptop.js"></script>
+  <script src="../js/engine.js"></script>
+  <script>
+    const output = document.querySelector('#results');
+    const results = [];
+    function test(name, run) {
+      try {
+        run();
+        results.push(`PASS ${name}`);
+      } catch (error) {
+        results.push(`FAIL ${name}: ${error.message}`);
+      }
+    }
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+    function hasError(result, text) {
+      return result.issues.some(issue => issue.level === 'error' && issue.msg.includes(text));
+    }
+
+    test('обнаруживает несовместимый сокет', () => {
+      const result = analyze({ cpu: 'i5-12400f', mb: 'asus-b650-plus' });
+      assert(hasError(result, 'Сокет'), 'ожидалась ошибка сокета');
+    });
+
+    test('обнаруживает несовместимый тип памяти', () => {
+      const result = analyze({ mb: 'msi-b760m-ddr4', ram: 'fury-d5-6000' });
+      assert(hasError(result, 'Память DDR5'), 'ожидалась ошибка типа памяти');
+    });
+
+    test('проверяет длину видеокарты относительно корпуса', () => {
+      const result = analyze({ gpu: 'rtx5080-tuf', case: 'matrexx-40' });
+      assert(hasError(result, 'максимум 320 мм'), 'ожидалась ошибка габаритов видеокарты');
+    });
+
+    test('проверяет число SATA-разъёмов питания', () => {
+      const original = BY.psu.pf450.sata;
+      try {
+        BY.psu.pf450.sata = 1;
+        const result = analyze({
+          cpu: 'r5-7600', mb: 'gig-b650m-ds3h', cooler: 'wraith-stealth',
+          ram: 'fury-d5-6000', ssd: '870evo-1t', sata: 'barracuda-2t',
+          case: 'matrexx-40', psu: 'pf450'
+        });
+        assert(hasError(result, 'разъёмов питания'), 'ожидалась ошибка разъёмов SATA-питания');
+      } finally {
+        BY.psu.pf450.sata = original;
+      }
+    });
+
+    test('проверяет число NVMe и SATA отсеков', () => {
+      const mb = BY.mb['asrock-b650m-hdv'];
+      const pcCase = BY.case['matrexx-40'];
+      const originalM2Slots = mb.m2Slots;
+      const originalBays25 = pcCase.bays25;
+      try {
+        mb.m2Slots = 1;
+        pcCase.bays25 = 0;
+        const result = analyze({
+          cpu: 'r5-7600', mb: mb.id, cooler: 'wraith-stealth',
+          ram: 'fury-d5-6000', ssd: 'nv2-500', sata: 'sn850x-2t',
+          case: pcCase.id, psu: 'pf450'
+        });
+        assert(hasError(result, 'M.2-дисков'), 'ожидалась ошибка при нехватке M.2 слотов');
+        const sataResult = analyze({
+          cpu: 'r5-7600', mb: 'gig-b650m-ds3h', cooler: 'wraith-stealth',
+          ram: 'fury-d5-6000', ssd: '870evo-1t', case: pcCase.id, psu: 'pf450'
+        });
+        assert(hasError(sataResult, 'дисков 2.5'), 'ожидалась ошибка при нехватке 2.5" отсеков');
+      } finally {
+        mb.m2Slots = originalM2Slots;
+        pcCase.bays25 = originalBays25;
+      }
+    });
+
+    test('проверяет полные готовые сборки и их бюджетные диапазоны', () => {
+      const bounds = {
+        'under-50': [0, 50000],
+        '50-100': [50000, 100000],
+        '100-150': [100000, 150000],
+        'over-150': [150000, Infinity]
+      };
+      assert(READY_BUILDS.length === 4, 'ожидалось четыре бюджетные сборки');
+      READY_BUILDS.forEach(build => {
+        const result = analyze(build.parts);
+        const [min, max] = bounds[build.budget] || [];
+        assert(min !== undefined, `${build.name}: неизвестная бюджетная группа`);
+        assert(result.errors === 0, `${build.name}: ${result.errors} ошибок совместимости`);
+        assert(result.price >= min && result.price < max, `${build.name}: цена ${result.price} вне диапазона`);
+        Object.keys(build.parts).forEach(category => {
+          const id = build.parts[category];
+          const catalogCategory = category === 'sata' ? 'ssd' : category;
+          if (id) assert(BY[catalogCategory] && BY[catalogCategory][id], `${build.name}: неизвестная деталь ${category}/${id}`);
+        });
+      });
+    });
+
+    test('не предлагает модульную память для MacBook с распаянной памятью', () => {
+      const result = analyzeLaptop('mba-m2', { ram: 'sd-ddr5-16' });
+      assert(result.errors > 0, 'ожидалась ошибка апгрейда памяти');
+    });
+
+    output.textContent = results.join('\n');
+    output.dataset.failed = String(results.some(result => result.startsWith('FAIL')));
+  </script>
+</body>
+</html>

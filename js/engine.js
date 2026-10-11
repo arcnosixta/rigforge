@@ -160,22 +160,36 @@ function analyze(b) {
         }
       }
     } else if (ssd.iface === 'sata') {
-      if (mb.sata < 1) add('error', 'ssd', 'На плате нет SATA-портов.');
-      else {
-        add('warn', 'ssd', 'SATA-диск: понадобится кабель SATA и питание от блока (есть у всех выбранных блоков).');
-        if (ssd.size === '3.5' && pcCase && pcCase.bays35 < 1) add('error', 'ssd', 'В корпусе нет отсеков под 3.5" HDD.');
-        if (ssd.size === '2.5' && pcCase && pcCase.bays25 < 1) add('error', 'ssd', 'В корпусе нет отсеков под 2.5" диски.');
+      add('warn', 'ssd', 'SATA-диск: понадобится кабель данных SATA и питание от блока.');
+    }
+  }
+  const m2Drives = [ssd, extra].filter(drive => drive && drive.iface.startsWith('m2'));
+  if (m2Drives.length) {
+    if (mb && m2Drives.length > mb.m2Slots) {
+      add('error', 'ssd', `Для ${m2Drives.length} M.2-дисков нужно столько же слотов, на плате доступно ${mb.m2Slots}.`);
+    } else if (m2Drives.length > 1) {
+      add('warn', 'ssd', 'Второй диск займёт свободный M.2-слот — при наличии радиатора проверьте его высоту.');
+    }
+  }
+  const sataDrives = [ssd, extra].filter(drive => drive && drive.iface === 'sata');
+  if (sataDrives.length) {
+    if (mb && sataDrives.length > mb.sata) {
+      add('error', 'ssd', `Для ${sataDrives.length} SATA-дисков нужно столько же портов, на плате доступно ${mb.sata}.`);
+    }
+    if (psu && sataDrives.length > psu.sata) {
+      add('error', 'psu', `Для ${sataDrives.length} SATA-дисков не хватает разъёмов питания: у блока ${psu.sata}.`);
+    }
+    if (pcCase) {
+      const drives35 = sataDrives.filter(drive => drive.size === '3.5').length;
+      const drives25 = sataDrives.filter(drive => drive.size === '2.5').length;
+      if (drives35 > pcCase.bays35) {
+        add('error', 'case', `Для ${drives35} дисков 3.5" в корпусе доступно ${pcCase.bays35} отсек(а).`);
+      }
+      if (drives25 > pcCase.bays25) {
+        add('error', 'case', `Для ${drives25} дисков 2.5" в корпусе доступно ${pcCase.bays25} отсек(а).`);
       }
     }
   }
-  if (ssd && pcCase && extra) {
-    if (pcCase.bays35 < 1 && extra.size === '3.5') add('error', 'ssd', 'В корпусе нет отсеков под 3.5" HDD.');
-  }
-  if (ssd && extra && ssd.iface.startsWith('m2') && extra.iface.startsWith('m2')) {
-    if (mb && mb.m2Slots < 2) add('error', 'ssd', `Второй M.2-диск не встанет: на плате всего ${mb.m2Slots} слот(а) M.2.`);
-    else add('warn', 'ssd', 'Второй диск займёт свободный M.2-слот — при наличии радиатора проверьте его высоту.');
-  }
-  if (extra && mb && extra.iface === 'sata' && mb.sata < 2) add('warn', 'ssd', 'SATA-портов мало — проверьте, не занят ли он выбранной SATA-SSD.');
 
   /* --- производительность --- */
   if (ram && gpu) {

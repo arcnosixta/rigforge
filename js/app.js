@@ -10,7 +10,23 @@ const state = {
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
+const CURRENCY_META = {
+  RUB: { fractionDigits: 0 },
+  USD: { fractionDigits: 2 },
+  KZT: { fractionDigits: 0 }
+};
+const RATE_CACHE_KEY = 'rigforge-rates-v1';
+let currency = 'RUB';
+let exchangeRates = { RUB: 1 };
+let rateUpdatedAt = '';
+let rateSource = 'none';
+let rateStorageWarning = false;
+const fmt = n => new Intl.NumberFormat('ru-RU', {
+  style: 'currency',
+  currency,
+  currencyDisplay: 'narrowSymbol',
+  maximumFractionDigits: CURRENCY_META[currency].fractionDigits
+}).format(n * (exchangeRates[currency] || 1));
 
 /* ---------- утилиты ---------- */
 function partsFor(cat) {
@@ -43,6 +59,22 @@ function specs(cat, p) {
     case 'psu': return [`${p.w} Вт`, p.cert, p.form, p.conn12 ? '12V-2x6' : `${p.conn8}×8-pin`, `EPS ${p.eps}`];
   }
   return [];
+}
+
+function productPhoto(cat, p) {
+  if (typeof p.photoUrl !== 'string' || !p.photoUrl.startsWith('https://')) return '';
+  const source = typeof p.photoSourceUrl === 'string' && p.photoSourceUrl.startsWith('https://')
+    ? `<a class="photo-credit" href="${p.photoSourceUrl}" target="_blank" rel="noopener noreferrer">Фото: ${p.photoSource || 'источник'}</a>`
+    : '';
+  return `<img class="product-photo" src="${p.photoUrl}" alt="Фото: ${p.name}" loading="lazy" decoding="async">${source}`;
+}
+
+function bindProductPhotos(root) {
+  $$('.product-photo', root).forEach(img => img.addEventListener('error', () => {
+    img.hidden = true;
+    const credit = img.parentElement.querySelector('.photo-credit');
+    if (credit) credit.hidden = true;
+  }, { once: true }));
 }
 
 /* ---------- выбор категории ---------- */
@@ -83,7 +115,7 @@ function renderParts() {
         : `<div class="badge b-ok">${icon('check', 13)} Подходит к этой сборке</div>`;
     const specHtml = specs(cat, p).filter(Boolean).map(s => `<span>${s}</span>`).join('');
     return `<article class="part ${sel === p.id ? 'sel' : ''} ${errs.length ? 'bad' : ''}" data-id="${p.id}" style="--d:${i * 45}ms" tabindex="0" role="button" aria-pressed="${sel === p.id}">
-      <div class="part-art">${partArt(cat, p)}</div>
+      <div class="part-art">${partArt(cat, p)}${productPhoto(cat, p)}</div>
       <div class="part-body">
         <div class="part-brand">${p.brand}</div>
         <h4>${p.name}</h4>
@@ -97,6 +129,7 @@ function renderParts() {
       </div>
     </article>`;
   }).join('');
+  bindProductPhotos(grid);
 }
 
 /* ---------- выбор части ---------- */
@@ -228,6 +261,15 @@ const PRESETS = {
   heavy: { cpu: 'r9-9950x', mb: 'msi-x870e-carbon', cooler: 'lf3-360', ram: 'lancer-d5-6400', gpu: 'rtx5080-tuf', ssd: 't700-1t', sata: null, case: 'o11-evo', psu: 'focus-gx-1000' }
 };
 
+let buildBudgetFilter = 'all';
+const BUILD_BUDGETS = [
+  { id: 'all', label: 'Все бюджеты' },
+  { id: 'under-50', label: 'До 50 тыс. ₽' },
+  { id: '50-100', label: '50–100 тыс. ₽' },
+  { id: '100-150', label: '100–150 тыс. ₽' },
+  { id: 'over-150', label: '150+ тыс. ₽' }
+];
+
 /* ---------- ноутбуки ---------- */
 function renderLaptops() {
   $('#ltModels').innerHTML = LAPTOPS.map(l => `
@@ -304,12 +346,13 @@ function renderCatalog() {
   }
   $('#catalogGrid').innerHTML = items.map(([cat, p], i) => `
     <article class="cat-card" style="--d:${Math.min(i, 24) * 30}ms">
-      <div class="cc-art">${partArt(cat, p)}</div>
+      <div class="cc-art">${partArt(cat, p)}${productPhoto(cat, p)}</div>
       <div class="cc-brand">${p.brand}</div>
       <h5>${p.name}</h5>
       <div class="specs">${specs(cat, p).filter(Boolean).map(s => `<span>${s}</span>`).join('')}</div>
       <b class="cc-price">${p.price ? fmt(p.price) : 'в комплекте'}</b>
     </article>`).join('');
+    bindProductPhotos($('#catalogGrid'));
 }
 
 /* ---------- правила (секция how) ---------- */
@@ -317,8 +360,8 @@ const HOW = [
   ['cpu', 'Сокет и поколение', 'AM5 ≠ LGA1700 ≠ LGA1851. Совпадение сокета — необходимое условие: процессор физически не встанет в чужую плату. Проверяем и чипсет (B650, B760, Z890): он определяет разгон, число линий и поддержку BIOS.'],
   ['ram', 'DDR4 против DDR5', 'Ключ слота разный, планка просто не войдёт. Сверяем также частоту с заявленным максимумом платы, число планок со слотами и общий объём с лимитом чипсета.'],
   ['case', 'Габариты', 'Плата должна совпадать с форм-фактором корпуса (ATX/mATX/ITX), длина видеокарты — с максимумом по длине, а башенный кулер — с высотой до крышки. Для СИО ищем посадочное место под радиатор.'],
-  ['psu', 'Питание и ватты', 'Считаем пиковое потребление (PL2/PPT процессора + TDP видеокарты + 40 Вт платы и дисков) с запасом 40%. Проверяем разъёмы: 8-pin, 12V-2x6, число EPS и форм-фактор ATX/SFX.'],
-  ['cooler', 'Запас по TDP', 'Кулер должен держать кратковременную мощность процессора. 65-ваттный боксовый кулер на 253-ваттном Core i9 — это троттлинг. Сверяем и сокет крепления, и реальный рейтинг охлаждения.'],
+  ['psu', 'Питание и ватты', 'Оцениваем потребление по PPT/TDP процессора, видеокарте и фиксированному резерву; рекомендуем мощность блока с дополнительным запасом. Проверяем разъёмы 8-pin, 12V-2x6 и EPS. Это ориентир, а не лабораторный замер.'],
+  ['cooler', 'Запас по охлаждению', 'Сопоставляем заявленный рейтинг кулера с кратковременной мощностью процессора и проверяем крепление. TDP кулеров не стандартизован между производителями, поэтому это грубая оценка, а не гарантия температуры или шума.'],
   ['ssd', 'Накопители', 'M.2 NVMe требует слота на плате: PCIe 5.0-диск в PCIe 4.0-слоте заработает, но на своей скорости. SATA-диску нужны свободный порт, кабель и отсек в корпусе.']
 ];
 function renderHow() {
@@ -391,6 +434,139 @@ function toast(msg) {
   t._h = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
+function savedRates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RATE_CACHE_KEY) || 'null');
+    if (!saved || typeof saved.updatedAt !== 'string' || !Number.isFinite(saved.savedAt)) return null;
+    if (!Number.isFinite(saved.rates?.USD) || !Number.isFinite(saved.rates?.KZT) ||
+        saved.rates.USD <= 0 || saved.rates.KZT <= 0) return null;
+    return saved;
+  } catch (e) {
+    return null;
+  }
+}
+
+function rateDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'дата неизвестна' :
+    new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
+}
+
+function updateRateStatus() {
+  const status = $('#rateStatus');
+  if (!status) return;
+  if (rateSource === 'live') {
+    status.textContent = `Курс обновлён: ${rateDate(rateUpdatedAt)}${rateStorageWarning ? ' · кэш не сохранён' : ''}`;
+  } else if (rateSource === 'cache') {
+    status.textContent = `Сохранённый курс: ${rateDate(rateUpdatedAt)}`;
+  } else {
+    status.textContent = 'Курс недоступен · цены в ₽';
+  }
+}
+
+async function initCurrency() {
+  const select = $('#currencySelect');
+  let preferred = 'RUB';
+  try {
+    const storedCurrency = localStorage.getItem('rigforge-currency');
+    if (CURRENCY_META[storedCurrency]) preferred = storedCurrency;
+  } catch (e) {}
+
+  const cached = savedRates();
+  if (cached) {
+    exchangeRates = { RUB: 1, USD: cached.rates.USD, KZT: cached.rates.KZT };
+    rateUpdatedAt = cached.updatedAt;
+    rateSource = 'cache';
+  }
+  currency = exchangeRates[preferred] ? preferred : 'RUB';
+  select.value = currency;
+  select.disabled = currency !== 'RUB' && !exchangeRates[currency];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 9000);
+  try {
+    const response = await fetch('https://open.er-api.com/v6/latest/RUB', { signal: controller.signal });
+    if (!response.ok) throw new Error(`Rate service returned ${response.status}`);
+    const data = await response.json();
+    const usd = data.rates && data.rates.USD;
+    const kzt = data.rates && data.rates.KZT;
+    if (data.result !== 'success' || !Number.isFinite(usd) || !Number.isFinite(kzt) || usd <= 0 || kzt <= 0) {
+      throw new Error('Rate service returned invalid RUB, USD, or KZT rates');
+    }
+    exchangeRates = { RUB: 1, USD: usd, KZT: kzt };
+    rateUpdatedAt = data.time_last_update_utc;
+    rateSource = 'live';
+    rateStorageWarning = false;
+    try {
+      localStorage.setItem(RATE_CACHE_KEY, JSON.stringify({
+        rates: { USD: usd, KZT: kzt },
+        updatedAt: rateUpdatedAt,
+        savedAt: Date.now()
+      }));
+    } catch (e) {
+      rateStorageWarning = true;
+    }
+    select.disabled = false;
+    select.value = currency;
+    updateRateStatus();
+    renderCurrencyPrices();
+  } catch (e) {
+    if (cached) {
+      rateSource = 'cache';
+      exchangeRates = { RUB: 1, USD: cached.rates.USD, KZT: cached.rates.KZT };
+      rateUpdatedAt = cached.updatedAt;
+      select.disabled = false;
+      select.value = currency;
+    } else {
+      currency = 'RUB';
+      select.value = currency;
+      select.disabled = false;
+      [...select.options].forEach(option => { option.disabled = option.value !== 'RUB'; });
+    }
+    updateRateStatus();
+    renderCurrencyPrices();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function renderCurrencyPrices() {
+  render();
+  upgradeSelects();
+  renderLaptopResult();
+  renderCatalog();
+  renderReadyBuilds();
+}
+
+function renderReadyBuilds() {
+  const labels = BUILD_BUDGETS.map(b => {
+    let label = b.label;
+    if (b.id === 'under-50') label = `До ${fmt(50000)}`;
+    if (b.id === '50-100') label = `${fmt(50000)}–${fmt(100000)}`;
+    if (b.id === '100-150') label = `${fmt(100000)}–${fmt(150000)}`;
+    if (b.id === 'over-150') label = `${fmt(150000)}+`;
+    return `<button class="chipbtn ${buildBudgetFilter === b.id ? 'on' : ''}" data-budget="${b.id}">${label}</button>`;
+  }).join('');
+  $('#budgetFilters').innerHTML = labels;
+
+  const builds = READY_BUILDS.filter(b => buildBudgetFilter === 'all' || b.budget === buildBudgetFilter);
+  $('#readyBuilds').innerHTML = builds.map(build => {
+    const result = analyze(build.parts);
+    const checkText = result.errors
+      ? `${result.errors} конфликтов совместимости`
+      : result.warns
+        ? `${result.warns} предупреждений — проверьте детали`
+        : 'Проверка конфигурации пройдена';
+    return `<article class="ready-build-card">
+      <div class="ready-build-meta"><span>${BUILD_BUDGETS.find(x => x.id === build.budget).label}</span><b>${fmt(result.price)}</b></div>
+      <h4>${build.name}</h4>
+      <p>${build.description}</p>
+      <p class="ready-build-check ${result.errors ? 'bad' : result.warns ? 'warn' : ''}">${checkText}</p>
+      <button class="btn btn-primary btn-sm" data-ready-build="${build.id}">Загрузить сборку</button>
+    </article>`;
+  }).join('');
+}
+
 function encodeBuild() {
   const o = {};
   for (const k in state.build) if (state.build[k]) o[k] = state.build[k];
@@ -410,14 +586,34 @@ function decodeBuild(s) {
 document.addEventListener('DOMContentLoaded', () => {
   if (location.hash.startsWith('#b=')) decodeBuild(location.hash.slice(3));
 
+  $('#catalogCount').dataset.count = Object.values(CATALOG).reduce((sum, list) => sum + list.length, 0);
   initReveal();
   initCounters();
   renderHow();
   renderCatalog();
+  renderReadyBuilds();
   renderLaptops();
   upgradeSelects();
   renderLaptopResult();
   render();
+  initCurrency();
+
+  $('#currencySelect').addEventListener('change', e => {
+    const next = e.target.value;
+    if (!exchangeRates[next]) {
+      e.target.value = currency;
+      toast('Нет доступного курса — цены оставлены в рублях');
+      return;
+    }
+    currency = next;
+    try {
+      localStorage.setItem('rigforge-currency', currency);
+    } catch (err) {
+      rateStorageWarning = true;
+    }
+    updateRateStatus();
+    renderCurrencyPrices();
+  });
 
   /* категории */
   $('#catChips').addEventListener('click', e => {
@@ -460,6 +656,26 @@ document.addEventListener('DOMContentLoaded', () => {
     toast('Загружена сборка «' + btn.textContent.trim() + '»');
     $('#summary').classList.remove('flash'); void $('#summary').offsetWidth; $('#summary').classList.add('flash');
   }));
+
+  $('#budgetFilters').addEventListener('click', e => {
+    const b = e.target.closest('[data-budget]');
+    if (!b) return;
+    buildBudgetFilter = b.dataset.budget;
+    renderReadyBuilds();
+  });
+  $('#readyBuilds').addEventListener('click', e => {
+    const b = e.target.closest('[data-ready-build]');
+    if (!b) return;
+    const build = READY_BUILDS.find(item => item.id === b.dataset.readyBuild);
+    if (!build) return;
+    state.build = { ...build.parts };
+    state.prevRows = new Set();
+    render();
+    $$('[data-preset]').forEach(x => x.classList.remove('on'));
+    toast(`Загружена сборка «${build.name}»`);
+    $('#summary').classList.remove('flash'); void $('#summary').offsetWidth; $('#summary').classList.add('flash');
+    $('#summary').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 
   $('#resetBtn').addEventListener('click', () => {
     state.build = { cpu: null, mb: null, cooler: null, ram: null, gpu: null, ssd: null, sata: null, case: null, psu: null };

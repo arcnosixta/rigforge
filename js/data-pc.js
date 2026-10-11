@@ -131,3 +131,34 @@ const CATEGORIES = [
   { key: 'case', label: 'Корпус', icon: 'case', req: true, hint: 'Вмещает плату, карту и кулер по габаритам' },
   { key: 'psu', label: 'Блок питания', icon: 'psu', req: true, hint: 'Мощность и коннекторы под вашу конфигурацию' }
 ];
+
+const READY_BUILDS = [
+  {
+    id: 'office-under-50',
+    name: 'Стартовая / офис',
+    budget: 'under-50',
+    description: 'Для учёбы, офиса и повседневных задач; без дискретной видеокарты.',
+    parts: { cpu: 'r5-7600', mb: 'asrock-b650m-hdv', cooler: 'wraith-stealth', ram: 'crucial-d5-5600-1', gpu: null, ssd: 'nv2-500', sata: null, case: 'matrexx-40', psu: 'pf450' }
+  },
+  {
+    id: 'gaming-50-100',
+    name: 'Игры 1080p',
+    budget: '50-100',
+    description: 'Сбалансированная сборка с Radeon RX 7600.',
+    parts: { cpu: 'i5-12400f', mb: 'asrock-b760m-pg', cooler: 'laminar-rm1', ram: 'fury-d4-3200', gpu: 'rx7600-pulse', ssd: 'nv2-500', sata: null, case: 'matrexx-40', psu: 'mag-a650bn' }
+  },
+  {
+    id: 'gaming-100-150',
+    name: 'Игры 1440p',
+    budget: '100-150',
+    description: 'Ryzen 5 и GeForce RTX 4060 Ti для игр в 1440p.',
+    parts: { cpu: 'r5-9600x', mb: 'asus-b650-plus', cooler: 'pa120', ram: 'fury-d5-6000', gpu: 'rtx4060ti-dual', ssd: 'sn770-1t', sata: null, case: 'ch510', psu: 'cx650' }
+  },
+  {
+    id: 'gaming-over-150',
+    name: 'Игры / тяжёлые задачи',
+    budget: 'over-150',
+    description: 'Мощный игровой процессор и GeForce RTX 4070 SUPER.',
+    parts: { cpu: 'r7-7800x3d', mb: 'msi-b650-tomahawk', cooler: 'ak620', ram: 'fury-d5-6000', gpu: 'rtx4070s-wf', ssd: 'sn850x-2t', sata: null, case: 'fractal-north', psu: 'rm750e' }
+  }
+];
