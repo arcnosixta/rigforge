@@ -91,7 +91,7 @@ const CATALOG = {
     { id: 't700-1t', brand: 'Crucial', name: 'T700 1 ТБ (PCIe 5.0)', iface: 'm2-pcie5', size: '2280', form: 'M.2 2280', read: 12400, price: 13990, note: 'Требует активного радиатора на плате' },
     { id: 'nv2-500', brand: 'Kingston', name: 'NV2 500 ГБ', iface: 'm2-pcie4', size: '2280', form: 'M.2 2280', read: 3500, price: 4290 },
     { id: '870evo-1t', brand: 'Samsung', name: '870 EVO 1 ТБ (SATA)', iface: 'sata', size: '2.5', form: '2.5" SATA', read: 560, price: 8490, note: 'Нужен SATA-порт на плате и кабель' },
-    { id: 'barracuda-2t', brand: 'Seagate', name: 'BarraCuda 2 ТБ (HDD)', iface: 'sata', size: '3.5', form: '3.5" SATA HDD', read: 190, price: 5490, note: 'Механический диск: медленный, но дешёвый' },
+    { id: 'barracuda-2t', brand: 'Seagate', name: 'BarraCuda 2 ТБ (HDD)', iface: 'sata', size: '3.5', form: '3.5" SATA HDD', read: 190, price: 5490, note: 'Механический диск: медленный, но дешёвый', photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Seagate_BarraCuda_Compute_2TB_3.5-inch_SATA_HDD_-_bottom_view_%28circuit_board%29.jpg/500px-Seagate_BarraCuda_Compute_2TB_3.5-inch_SATA_HDD_-_bottom_view_%28circuit_board%29.jpg', photoSource: 'ITEagle Europe — Sebastiaan Broekhoven · Wikimedia Commons', photoSourceUrl: 'https://commons.wikimedia.org/wiki/File:Seagate_BarraCuda_Compute_2TB_3.5-inch_SATA_HDD_-_bottom_view_(circuit_board).jpg', photoLicense: 'CC BY-SA 4.0', photoLicenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/' },
     { id: 'sn850x-2t', brand: 'WD', name: 'BLACK SN850X 2 ТБ', iface: 'm2-pcie4', size: '2280', form: 'M.2 2280', read: 7300, price: 14990 }
   ],
 
