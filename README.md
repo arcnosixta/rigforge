@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" width="120" alt="RIGFORGE logo">
+</p>
+
 # RIGFORGE — конфигуратор сборки ПК
 
 Анимационный лендинг-конфигуратор: подбор комплектующих с проверками совместимости
